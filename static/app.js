@@ -24,6 +24,10 @@ const clearLogsBtn = document.getElementById('clear-logs-btn');
 const logsToggle = document.getElementById('logs-toggle');
 const autoscrollLabel = document.getElementById('autoscroll-label');
 
+// Theme Toggle Elements
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIcon = document.getElementById('theme-icon');
+
 /* ----------------------------------------------------
    Device Status & Parsing Helpers
 ------------------------------------------------------- */
@@ -315,17 +319,59 @@ function escapeHTML(str) {
         .replace(/'/g, "&#039;");
 }
 
+// Update Theme Toggler Icon SVG
+function updateThemeIcon(theme) {
+    if (theme === 'light') {
+        themeIcon.innerHTML = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        `;
+    } else {
+        themeIcon.innerHTML = `
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        `;
+    }
+}
+
 /* ----------------------------------------------------
    Setup and Event Listeners
 ------------------------------------------------------- */
 
 // Initialize app
 function init() {
+    // Initialize Theme
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    document.body.className = `${currentTheme}-theme`;
+    updateThemeIcon(currentTheme);
+    
     fetchDevices();
     
     // Setup background polling intervals
-    setInterval(fetchLogs, 2000);       // Poll logs every 2 seconds (starts active only if toggled)
+    setInterval(fetchLogs, 2000);       // Poll logs every 2 seconds
     setInterval(fetchDevices, 10000);   // Poll devices every 10 seconds
+    
+    // Theme toggler click listener
+    themeToggleBtn.addEventListener('click', () => {
+        let activeTheme = 'dark';
+        if (document.body.classList.contains('dark-theme')) {
+            document.body.classList.remove('dark-theme');
+            document.body.classList.add('light-theme');
+            activeTheme = 'light';
+        } else {
+            document.body.classList.remove('light-theme');
+            document.body.classList.add('dark-theme');
+            activeTheme = 'dark';
+        }
+        localStorage.setItem('theme', activeTheme);
+        updateThemeIcon(activeTheme);
+    });
     
     // Wire logs toggle slider
     logsToggle.addEventListener('change', () => {
