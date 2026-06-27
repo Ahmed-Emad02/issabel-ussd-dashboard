@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSM Dongle USSD Command Center</title>
+    <title>Sokrat Pro Tech USSD Manager</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/static/logo.jpg">
     <!-- CSS stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -17,14 +19,10 @@
         <header class="app-header">
             <div class="header-left">
                 <div class="logo-mark">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2 17L12 22L22 17" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2 12L12 17L22 12" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <img src="/static/logo.jpg" alt="Sokrat Pro Tech Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 6px;">
                 </div>
                 <div>
-                    <h1 class="main-title">GSM DONGLE USSD CENTER</h1>
+                    <h1 class="main-title">SOKRAT PRO TECH USSD MANAGER</h1>
                     <p class="subtitle">Asterisk 11 &amp; chan_dongle Management Console</p>
                 </div>
             </div>
@@ -80,15 +78,13 @@
                     <span class="selection-badge" id="selected-dongle-badge">No Dongle Selected</span>
                 </div>
                 <div class="console-body">
-                    <!-- Device detail subpanel -->
+                    <!-- Device detail subpanel (Only ID, Number, Provider, IMEI) -->
                     <div class="detail-card info-card hidden" id="device-detail-card">
                         <div class="detail-grid">
+                            <div class="detail-item"><strong>Dongle ID:</strong> <span id="detail-dongle-id">-</span></div>
+                            <div class="detail-item"><strong>SIM Number:</strong> <span id="detail-number">-</span></div>
                             <div class="detail-item"><strong>Provider:</strong> <span id="detail-provider">-</span></div>
-                            <div class="detail-item"><strong>RSSI:</strong> <span id="detail-rssi">-</span></div>
-                            <div class="detail-item"><strong>Model:</strong> <span id="detail-model">-</span></div>
-                            <div class="detail-item"><strong>Firmware:</strong> <span id="detail-firmware">-</span></div>
                             <div class="detail-item"><strong>IMEI:</strong> <span id="detail-imei">-</span></div>
-                            <div class="detail-item"><strong>IMSI:</strong> <span id="detail-imsi">-</span></div>
                         </div>
                     </div>
 
@@ -145,15 +141,22 @@
                     Live Asterisk chan_dongle Logs
                 </h2>
                 <div class="log-controls">
-                    <label class="control-checkbox">
+                    <div class="log-toggle-wrapper">
+                        <span class="control-label">Show Live Logs</span>
+                        <label class="switch">
+                            <input type="checkbox" id="logs-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <label class="control-checkbox hidden" id="autoscroll-label">
                         <input type="checkbox" id="autoscroll-checkbox" checked>
                         <span>Auto-scroll</span>
                     </label>
-                    <button id="clear-logs-btn" class="small-btn">Clear View</button>
+                    <button id="clear-logs-btn" class="small-btn hidden">Clear View</button>
                 </div>
             </div>
-            <div class="log-screen" id="log-screen-content">
-                <div class="log-line system-line">[System] Initializing log stream...</div>
+            <div class="log-screen collapsed" id="log-screen-content">
+                <div class="log-line system-line">[System] Click 'Show Live Logs' to monitor console stream...</div>
             </div>
         </section>
     </div>

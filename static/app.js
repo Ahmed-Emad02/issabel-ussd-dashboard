@@ -20,6 +20,10 @@ const logScreen = document.getElementById('log-screen-content');
 const autoscrollCheckbox = document.getElementById('autoscroll-checkbox');
 const clearLogsBtn = document.getElementById('clear-logs-btn');
 
+// Toggle Slider Elements
+const logsToggle = document.getElementById('logs-toggle');
+const autoscrollLabel = document.getElementById('autoscroll-label');
+
 /* ----------------------------------------------------
    Device Status & Parsing Helpers
 ------------------------------------------------------- */
@@ -33,7 +37,6 @@ function getStateClass(state) {
 }
 
 // Generate Signal Bars HTML based on RSSI value
-// Asterisk RSSI ranges from 0 to 31. 99 means unknown.
 function getSignalBarsHTML(rssiStr, state) {
     const rssi = parseInt(rssiStr, 10);
     const s = state.toLowerCase();
@@ -107,8 +110,6 @@ function renderDevices() {
         const isSelected = dev.ID === selectedDeviceId;
         const stateClass = getStateClass(dev.State);
         const signalHTML = getSignalBarsHTML(dev.RSSI, dev.State);
-        
-        // Use default phone number or placeholder if empty/unknown
         const phoneNum = dev.Number && dev.Number.toLowerCase() !== 'unknown' ? dev.Number : 'No Phone Number';
         
         html += `
@@ -171,13 +172,11 @@ function selectDevice(id) {
     selectedDongleBadge.textContent = dev.ID;
     selectedDongleBadge.className = 'selection-badge active';
     
-    // Load device details
+    // Load minimal device details (Dongle ID, Number, Provider, IMEI)
+    document.getElementById('detail-dongle-id').textContent = dev.ID;
+    document.getElementById('detail-number').textContent = dev.Number && dev.Number.toLowerCase() !== 'unknown' ? dev.Number : 'Unknown';
     document.getElementById('detail-provider').textContent = dev["Provider Name"] || 'Unknown';
-    document.getElementById('detail-rssi').textContent = dev.RSSI + '/31';
-    document.getElementById('detail-model').textContent = dev.Model || '-';
-    document.getElementById('detail-firmware').textContent = dev.Firmware || '-';
     document.getElementById('detail-imei').textContent = dev.IMEI || '-';
-    document.getElementById('detail-imsi').textContent = dev.IMSI || '-';
     
     // Show forms and detail panels
     deviceDetailCard.classList.remove('hidden');
@@ -260,6 +259,9 @@ async function sendUSSDRequest(e) {
 
 // Fetch Asterisk chan_dongle logs from buffer
 async function fetchLogs() {
+    // Only query logs if the live log slider is turned on
+    if (!logsToggle.checked) return;
+    
     try {
         const response = await fetch('/api/logs');
         const data = await response.json();
@@ -320,15 +322,28 @@ function escapeHTML(str) {
 // Initialize app
 function init() {
     fetchDevices();
-    fetchLogs();
     
     // Setup background polling intervals
-    setInterval(fetchLogs, 2000);       // Poll logs every 2 seconds
+    setInterval(fetchLogs, 2000);       // Poll logs every 2 seconds (starts active only if toggled)
     setInterval(fetchDevices, 10000);   // Poll devices every 10 seconds
+    
+    // Wire logs toggle slider
+    logsToggle.addEventListener('change', () => {
+        if (logsToggle.checked) {
+            logScreen.classList.remove('collapsed');
+            autoscrollLabel.classList.remove('hidden');
+            clearLogsBtn.classList.remove('hidden');
+            // Fetch logs immediately
+            fetchLogs();
+        } else {
+            logScreen.classList.add('collapsed');
+            autoscrollLabel.classList.add('hidden');
+            clearLogsBtn.classList.add('hidden');
+        }
+    });
     
     // Bind Event Listeners
     refreshDevicesBtn.addEventListener('click', () => {
-        // Simple spin visual animation
         const svg = refreshDevicesBtn.querySelector('svg');
         svg.style.transition = 'transform 0.8s ease';
         svg.style.transform = 'rotate(360deg)';
