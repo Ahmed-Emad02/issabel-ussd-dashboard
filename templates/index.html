@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSM Dongle USSD Command Center</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-mark">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="main-title">GSM DONGLE USSD CENTER</h1>
+                    <p class="subtitle">Asterisk 11 &amp; chan_dongle Management Console</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="pulse-dot active" id="server-status-dot"></span>
+                    <span class="status-text" id="server-status-text">Connecting to Asterisk...</span>
+                </div>
+                <div class="server-badge">192.168.100.81</div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            <!-- Left Side: Devices List -->
+            <section class="panel-section devices-panel" aria-labelledby="devices-title">
+                <div class="panel-header">
+                    <h2 id="devices-title" class="panel-title">
+                        <svg class="panel-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                        Connected GSM Dongles
+                    </h2>
+                    <button id="refresh-devices-btn" class="icon-btn" title="Refresh Dongle Status">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M1 20v-6h6"></path>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="devices-list" id="devices-list-container">
+                    <!-- Dynamic Devices list loaded here -->
+                    <div class="skeleton-loader">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: USSD Console -->
+            <section class="panel-section console-panel" aria-labelledby="console-title">
+                <div class="panel-header">
+                    <h2 id="console-title" class="panel-title">
+                        <svg class="panel-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                        </svg>
+                        USSD Request Panel
+                    </h2>
+                    <span class="selection-badge" id="selected-dongle-badge">No Dongle Selected</span>
+                </div>
+                <div class="console-body">
+                    <!-- Device detail subpanel -->
+                    <div class="detail-card info-card hidden" id="device-detail-card">
+                        <div class="detail-grid">
+                            <div class="detail-item"><strong>Provider:</strong> <span id="detail-provider">-</span></div>
+                            <div class="detail-item"><strong>RSSI:</strong> <span id="detail-rssi">-</span></div>
+                            <div class="detail-item"><strong>Model:</strong> <span id="detail-model">-</span></div>
+                            <div class="detail-item"><strong>Firmware:</strong> <span id="detail-firmware">-</span></div>
+                            <div class="detail-item"><strong>IMEI:</strong> <span id="detail-imei">-</span></div>
+                            <div class="detail-item"><strong>IMSI:</strong> <span id="detail-imsi">-</span></div>
+                        </div>
+                    </div>
+
+                    <!-- No Selection Placeholder -->
+                    <div id="no-selection-placeholder" class="empty-state-container">
+                        <div class="empty-state-icon">📱</div>
+                        <h3>No Dongle Selected</h3>
+                        <p>Please select an active, free GSM dongle from the left panel to execute USSD codes.</p>
+                    </div>
+
+                    <!-- USSD Execution Form -->
+                    <form id="ussd-form" class="ussd-form hidden">
+                        <div class="form-group">
+                            <label for="ussd-code-input" class="form-label">USSD Code</label>
+                            <div class="input-console-wrapper">
+                                <span class="console-prefix">&gt;</span>
+                                <input type="text" id="ussd-code-input" class="console-input" placeholder="e.g. *868# or *100#" required autocomplete="off">
+                            </div>
+                            <span class="form-helper">Ensure the SIM card in the selected dongle is active and registered to the network.</span>
+                        </div>
+                        <button type="submit" id="send-btn" class="primary-btn">
+                            <span class="btn-text">Execute USSD Request</span>
+                            <span class="btn-loader hidden"></span>
+                        </button>
+                    </form>
+
+                    <!-- USSD Response Screen -->
+                    <div class="terminal-container hidden" id="terminal-response-container">
+                        <div class="terminal-header">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                            <span class="terminal-title">USSD Response Screen</span>
+                        </div>
+                        <div class="terminal-screen" id="terminal-screen-content">
+                            <div class="terminal-line placeholder-line">Terminal ready. Run a command above.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom: Live Logs -->
+        <section class="panel-section logs-panel" aria-labelledby="logs-title">
+            <div class="panel-header">
+                <h2 id="logs-title" class="panel-title">
+                    <svg class="panel-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Live Asterisk chan_dongle Logs
+                </h2>
+                <div class="log-controls">
+                    <label class="control-checkbox">
+                        <input type="checkbox" id="autoscroll-checkbox" checked>
+                        <span>Auto-scroll</span>
+                    </label>
+                    <button id="clear-logs-btn" class="small-btn">Clear View</button>
+                </div>
+            </div>
+            <div class="log-screen" id="log-screen-content">
+                <div class="log-line system-line">[System] Initializing log stream...</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Frontend logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

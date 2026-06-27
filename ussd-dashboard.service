@@ -1,0 +1,13 @@
+[Unit]
+Description=GSM Dongle USSD Dashboard
+After=network.target asterisk.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/ussd-dashboard
+ExecStart=/usr/bin/python3 app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
